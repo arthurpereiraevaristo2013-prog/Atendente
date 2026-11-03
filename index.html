@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>VR Atendente</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "@mediapipe/tasks-vision": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/vision_bundle.mjs"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<video id="cam" playsinline muted autoplay></video>
+
+<div id="menu" class="screen active">
+  <div class="brand"><span class="logo">VR</span><h1>Atendente</h1><p>Simulador de loja com rastreamento real das mãos</p></div>
+  <div class="menu-buttons">
+    <button id="btn-start" class="primary">▶ Iniciar jogo</button>
+    <button id="btn-calib-vr">Calibrar VR</button>
+    <button id="btn-calib-hands">Calibrar Hand Tracking</button>
+    <button id="btn-settings">Configurações</button>
+    <button id="btn-desktop">Modo teste (mouse)</button>
+  </div>
+  <div id="status" class="status"></div>
+  <p class="hint">Coloque o celular no VR Box <b>depois</b> de tocar em Iniciar. Toque na tela para centralizar a câmera.</p>
+</div>
+
+<div id="settings" class="screen">
+  <h2>Configurações</h2>
+  <div class="grid">
+    <label>Qualidade gráfica
+      <select id="s-quality"><option value="low">Baixa</option><option value="medium">Média</option><option value="high">Alta</option></select></label>
+    <label class="check"><input type="checkbox" id="s-perf"> Modo desempenho (menos resolução, rastreio a ~15 FPS)</label>
+    <label>Resolução de renderização <output id="o-scale"></output>
+      <input type="range" id="s-scale" min="0.4" max="1" step="0.05"></label>
+    <label>Volume geral <output id="o-vol"></output>
+      <input type="range" id="s-vol" min="0" max="1" step="0.05"></label>
+    <label>Sensibilidade da cabeça <output id="o-gyro"></output>
+      <input type="range" id="s-gyro" min="0.5" max="2" step="0.05"></label>
+    <label>Sensibilidade das mãos (alcance) <output id="o-reach"></output>
+      <input type="range" id="s-reach" min="0.6" max="2" step="0.05"></label>
+    <label>Suavização das mãos <output id="o-smooth"></output>
+      <input type="range" id="s-smooth" min="0" max="1" step="0.05"></label>
+    <label>Campo de visão (FOV) <output id="o-fov"></output>
+      <input type="range" id="s-fov" min="60" max="110" step="1"></label>
+    <label>Distância entre lentes (IPD, mm) <output id="o-ipd"></output>
+      <input type="range" id="s-ipd" min="50" max="75" step="1"></label>
+    <label>Correção de distorção das lentes <output id="o-dist"></output>
+      <input type="range" id="s-dist" min="0" max="0.6" step="0.02"></label>
+    <label>Câmera usada para as mãos
+      <select id="s-camera"><option value="environment">Traseira (recomendado no VR Box)</option><option value="user">Frontal</option></select></label>
+    <label class="check"><input type="checkbox" id="s-mirror"> Espelhar imagem da câmera (use com a frontal)</label>
+    <label class="check"><input type="checkbox" id="s-preview"> Mostrar prévia da câmera no jogo</label>
+  </div>
+  <div class="row"><button id="btn-settings-back" class="primary">Salvar e voltar</button><button id="btn-reset">Restaurar padrões</button></div>
+</div>
+
+<div id="calib-hands" class="screen">
+  <h2>Calibrar Hand Tracking</h2>
+  <p>Aponte a câmera para as mãos. Estique <b>uma mão aberta</b> na distância confortável de alcance (~35 cm) e mantenha parada.</p>
+  <div class="preview"><canvas id="calib-canvas"></canvas></div>
+  <div id="calib-info" class="status">Iniciando câmera…</div>
+  <div class="row"><button id="btn-calib-capture" class="primary">Capturar (3 s)</button><button id="btn-calib-hands-back">Voltar</button></div>
+</div>
+
+<div id="calib-vr" class="screen transparent">
+  <div class="vr-calib-ui">
+    <p>Calibração VR: olhe para frente, ajuste as lentes até a grade ficar nítida e sem curvar nas bordas.</p>
+    <label>IPD <input type="range" id="c-ipd" min="50" max="75" step="1"></label>
+    <label>Distorção <input type="range" id="c-dist" min="0" max="0.6" step="0.02"></label>
+    <label>FOV <input type="range" id="c-fov" min="60" max="110" step="1"></label>
+    <div class="row"><button id="btn-vr-center">Centralizar</button><button id="btn-vr-done" class="primary">Salvar</button></div>
+  </div>
+</div>
+
+<div id="loading" class="screen"><div class="spinner"></div><p id="loading-text">Carregando…</p></div>
+<div id="fatal" class="screen"><h2>Algo deu errado</h2><pre id="fatal-text"></pre><button onclick="location.reload()">Recarregar</button></div>
+
+<canvas id="overlay"></canvas>
+<div id="fps"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
